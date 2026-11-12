@@ -1,8 +1,8 @@
+#include "commands.h"
 #include "common.h"
 
 #include <errno.h>
 #include <getopt.h>
-#include <inttypes.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <signal.h>
@@ -12,8 +12,6 @@
 #include <sys/prctl.h>
 #include <sys/signalfd.h>
 #include <sys/socket.h>
-#include <sys/sysinfo.h>
-#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
@@ -116,30 +114,11 @@ static enum line_status receive_baseline(int fd, char *line, size_t capacity)
     return LINE_OK;
 }
 
-static void system_info(char *reply, size_t capacity)
-{
-    struct utsname os;
-    struct sysinfo info;
-    if (uname(&os) < 0 || sysinfo(&info) < 0) {
-        snprintf(reply, capacity, "ERR system info unavailable\n");
-        return;
-    }
-
-    const uintmax_t mib = 1024 * 1024;
-    uintmax_t total = (uintmax_t)info.totalram * info.mem_unit / mib;
-    uintmax_t free = (uintmax_t)info.freeram * info.mem_unit / mib;
-    snprintf(reply, capacity,
-             "OK system=%s release=%s arch=%s uptime_s=%ld "
-             "ram_total_mib=%ju ram_free_mib=%ju worker_pid=%ld\n",
-             os.sysname, os.release, os.machine, info.uptime,
-             total, free, (long)getpid());
-}
-
 static int send_reply(int fd, const char *reply, const struct settings *settings)
 {
     int flags = settings->baseline ? 0 : MSG_NOSIGNAL;
     if (settings->reply_delay_ms > 0 && strncmp(reply, "OK ", 3) == 0) {
-        /* Separate the status prefix and payload for the disconnect test. */
+        /* The reset test closes the client after it reads the status prefix. */
         if (send_all(fd, reply, 3, flags) < 0) {
             return -1;
         }
@@ -170,12 +149,8 @@ static int handle_request(int fd, const struct settings *settings)
             return status == LINE_EOF ? 0 : 2;
         }
         snprintf(reply, sizeof(reply), "ERR %s\n", line_error(status));
-    } else if (strcmp(request, "SYSINFO") == 0) {
-        system_info(reply, sizeof(reply));
-    } else if (strcmp(request, "PING") == 0) {
-        snprintf(reply, sizeof(reply), "OK pong\n");
     } else {
-        snprintf(reply, sizeof(reply), "ERR unknown command\n");
+        format_command_reply(request, reply, sizeof(reply));
     }
 
     if (send_reply(fd, reply, settings) < 0 && !settings->baseline) {

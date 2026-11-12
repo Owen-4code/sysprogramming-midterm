@@ -2,6 +2,14 @@
 
 這個 C 專案透過 TCP 查詢 Ubuntu 的系統資訊。server 監聽本機 `127.0.0.1`，每條連線由一個 `fork()` 建立的子行程處理。程式支援 `SYSINFO` 和 `PING`。請求及回應都以換行結尾，每條連線處理一次查詢。
 
+## 程式結構
+
+- `src/server.c` 接受 TCP 連線、建立子行程，並處理讀取逾時、斷線及子行程回收。
+- `src/commands.c` 負責回應系統資訊查詢和 PING。
+- `src/client.c` 解析命令列，送出一行請求並顯示回覆。
+- `src/common.c` 提供兩端共用的收送、參數解析與除錯日誌，建置成 `libsysprogram.so`。
+- `tests/test_suite.c` 驗證10 條同時連線及三組異常對照。
+
 ## 在 Ubuntu 執行
 
 在第一個終端機編譯並啟動 server：
