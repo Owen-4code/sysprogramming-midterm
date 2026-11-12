@@ -1,0 +1,2 @@
+event=request command=SYSINFO port=41083
+OK system=Linux release=6.18.33.2-microsoft-standard-WSL2 arch=x86_64 uptime_s=648 ram_total_mib=15761 ram_free_mib=15134 worker_pid=797

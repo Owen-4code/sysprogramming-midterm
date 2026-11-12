@@ -1,0 +1,9 @@
+DEBUG=0 without --debug
+OK pong
+DEBUG=0 with --debug
+OK pong
+DEBUG=1 without --debug
+OK pong
+DEBUG=1 with --debug
+event=request command=PING port=44531
+OK pong

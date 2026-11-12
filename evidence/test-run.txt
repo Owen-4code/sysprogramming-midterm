@@ -1,0 +1,25 @@
+cc -Iinclude -D_GNU_SOURCE -DSYSPROG_DEBUG=1 -O2 -g -std=c17 -Wall -Wextra -Wpedantic  -o build/debug1/test_suite tests/test_suite.c -Lbuild/debug1 -lsysprogram -Wl,-rpath,'$ORIGIN' 
+timeout 30s build/debug1/test_suite build/debug1/server build/debug1/client
+OK system=Linux release=6.18.33.2-microsoft-standard-WSL2 arch=x86_64 uptime_s=563 ram_total_mib=15761 ram_free_mib=13975 worker_pid=600
+CONCURRENCY SNAPSHOT (server_pid=598, before any client sent a request)
+client_pid=601 client_port=59172 worker_pid=607 state=connected
+client_pid=603 client_port=59188 worker_pid=609 state=connected
+client_pid=605 client_port=59194 worker_pid=613 state=connected
+client_pid=606 client_port=59206 worker_pid=614 state=connected
+client_pid=608 client_port=59218 worker_pid=615 state=connected
+client_pid=610 client_port=59230 worker_pid=616 state=connected
+client_pid=611 client_port=59244 worker_pid=617 state=connected
+client_pid=612 client_port=59256 worker_pid=618 state=connected
+client_pid=604 client_port=59262 worker_pid=619 state=connected
+client_pid=602 client_port=59276 worker_pid=620 state=connected
+PASS: 10 simultaneous connections; 10/10 SYSINFO responses
+SPLIT    baseline  -> ERR unknown command
+IDLE     baseline  -> still waiting after 750 ms; later PING: OK pong
+RESET    baseline  -> event=reaped worker=625 exit=0
+RESET    baseline  -> next client: OK pong
+SPLIT    protected -> OK system=Linux release=6.18.33.2-microsoft-standard-WSL2 arch=x86_64 uptime_s=566 ram_total_mib=15761 ram_free_mib=13978 worker_pid=628
+IDLE     protected -> ERR timeout; connection closed
+RESET    protected -> event=write_failed worker=630 errno=104 (Connection reset by peer)
+RESET    protected -> event=reaped worker=630 exit=3
+RESET    protected -> next client: OK pong
+PASS: all three baseline/protected comparisons
